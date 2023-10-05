@@ -3,7 +3,7 @@ package kv1s
 import (
 	"fmt"
 	
-	"github.com/saintwish/kv/maphash"
+	"github.com/dolthub/maphash"
 )
 
 type Cache[K comparable, V any] struct {
