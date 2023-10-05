@@ -119,7 +119,7 @@ func (m *shard[K, V]) isExpired(key K) (ex bool) {
 	m.RLock()
 
 	if v, ok := m.Map.GetHas(key); ok {
-		ex = time.Now().Before(v.Expire)
+		ex = time.Now().After(v.Expire)
 	}
 
 	m.RUnlock()
@@ -132,7 +132,7 @@ func (m *shard[K, V]) evictItem(key K, cb func(K,V)) (ex bool) {
 
 	ex = false
 	if v, ok := m.Map.GetHas(key); ok {
-		if time.Now().Before(v.Expire) {
+		if time.Now().After(v.Expire) {
 			ex = true
 			cb(key, v.Object)
 			m.Map.Delete(key)
@@ -148,7 +148,7 @@ func (m *shard[K, V]) evictExpired(cb func(K,V)) {
 	m.Lock()
 
 	m.Map.Iter(func (key K, v item[V]) (stop bool) {
-		if time.Now().Before(v.Expire) {
+		if time.Now().After(v.Expire) {
 			cb(key, v.Object)
 			m.Map.Delete(key)
 		}

@@ -97,6 +97,11 @@ func (c *Cache[K, V]) Update(key K, val V) error {
 	return nil
 }
 
+func (c *Cache[K, V]) Renew(key K) {
+	shard := c.getShard(key)
+	shard.renew(key)
+}
+
 func (c *Cache[K, V]) Delete(key K) bool {
 	shard := c.getShard(key)
 	return shard.delete(key)

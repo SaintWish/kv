@@ -37,3 +37,19 @@ func TestFlush(t *testing.T) {
 
 	cache.Flush()
 }
+
+func TestExpired(t *testing.T) {
+	cache := New[int, string](200*time.Millisecond, 2048, 32)
+	cache.SetOnEvicted(func(k int, v string){
+		fmt.Printf("Evicted: %d\n", k)
+	})
+
+	cache.Set(1337, "leet haxiors")
+	cache.Set(1338, "leet haxiors1")
+	cache.Set(3434, "leet haxiors2")
+	cache.Set(5465, "leet haxiors3")
+
+	time.Sleep(700*time.Millisecond)
+
+	cache.DeleteExpired()
+}
