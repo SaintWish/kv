@@ -35,7 +35,6 @@ func (c *Cache[K, V]) getShardIndex(key K) uint64 {
 
 func (c *Cache[K, V]) getShard(key K) *shardMap[K, V] {
 	sum := c.hash.Hash(key)
-	fmt.Println(sum)
 	return c.shards[sum%c.shardCount]
 }
 
