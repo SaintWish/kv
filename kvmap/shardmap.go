@@ -12,7 +12,7 @@ type shardMap[K comparable, V any] struct {
 
 func newShardMap[K comparable, V any]() *shardMap[K, V] {
 	return &shardMap[K, V] {
-		Map: make(map[K]V),
+		Map: make(map[K]V, 0),
 	}
 }
 
