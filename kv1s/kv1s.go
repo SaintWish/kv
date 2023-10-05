@@ -21,7 +21,7 @@ func New[K comparable, V any](sz uint64, sc uint64) *Cache[K, V] {
 
 	cache := Cache[K, V] {}
 	cache.shards = make([]*shard[K, V], sc)
-	cache.hash = maphash.NewHasher[K](0)
+	cache.hash = maphash.NewHasher[K]()
 	cache.shardCount = sc
 
 	for i := 0; i < int(sc); i++ {
