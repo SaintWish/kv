@@ -10,3 +10,6 @@ All of the packages of generic support for safety. Some of the packages use the 
 * `kvmap` - A Key Value sharded cache using vanilla Go map with no auto eviction.
 * `ccmap` - A concurrent safe map without sharding.
 * `stack` - A last in, first out stack implementation without concurrency support. Used in the ``kv2`` package.
+
+## Licensing
+The [swiss map](https://github.com/dolthub/swiss) and this package are licensed with Apache-2.0
