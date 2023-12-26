@@ -2,7 +2,7 @@
 A collection of a few Go packages for Key Value storage like caches.
 
 ## Packages
-All of the packages of generic support for safety.
+All of the packages of generic support for safety. Some of the packages use the [swiss map](https://github.com/dolthub/swiss) instead of the default Go map.
 
 * `kv1` - A Key Value sharded cache with time expiration using the swiss map.
 * `kv1s` - A Key Value sharded cache using swiss map without any auto eviction.
