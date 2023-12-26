@@ -126,8 +126,8 @@ func (m *Map[K, V]) Get(key K) (value V) {
 	}
 }
 
-// GetHas returns the |value| mapped by |key|.
-func (m *Map[K, V]) GetHas(key K) (value V, ok bool) {
+// GetHas returns the |value| and |ok| mapped by |key|.
+func (m *Map[K, V]) GetHas(key K) (ok bool, value V) {
 	hi, lo := splitHash(m.hash.Hash(key))
 	g := probeStart(hi, len(m.groups))
 	for { // inlined find loop
@@ -189,7 +189,7 @@ func (m *Map[K, V]) Set(key K, value V) {
 }
 
 // Delete attempts to remove |key|, returns true successful and the item.
-func (m *Map[K, V]) Delete(key K) (ok bool, val V) {
+func (m *Map[K, V]) Delete(key K) (ok bool, value V) {
 	hi, lo := splitHash(m.hash.Hash(key))
 	g := probeStart(hi, len(m.groups))
 	for {
