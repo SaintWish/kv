@@ -30,14 +30,14 @@ func (m *shard[K, V]) has(key K) bool {
 	return ok
 }
 
-func (m *shard[K, V]) getHas(key K) (V, bool) {
+func (m *shard[K, V]) getHas(key K) (val V, ok bool) {
 	m.RLock()
 
-	val, ok := m.Map.GetHas(key)
+	ok, val = m.Map.GetHas(key)
 
 	m.RUnlock()
 
-	return val, ok
+	return
 }
 
 func (m *shard[K, V]) getHasRenew(key K) (V, bool) {
@@ -72,7 +72,7 @@ func (m *shard[K, V]) set(key K, val V, callback func(K, V)) {
 func (m *shard[K, V]) update(key K, val V) {
 	m.Lock()
 
-	if val, ok := m.Map.GetHas(key); ok {
+	if ok, val := m.Map.GetHas(key); ok {
 		m.Map.Set(key, val)
 	}
 

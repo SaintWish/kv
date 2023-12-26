@@ -42,7 +42,7 @@ func (m *shard[K, V]) get(key K) (val V) {
 func (m *shard[K, V]) getRenew(key K) (val V) {
 	m.Lock()
 
-	if v,ok := m.Map.GetHas(key); ok {
+	if ok,v := m.Map.GetHas(key); ok {
 		v.Expire = time.Now().Add(m.Expiration)
 		m.Map.Set(key, v)
 		val = v.Object
@@ -66,7 +66,7 @@ func (m *shard[K, V]) has(key K) (ok bool) {
 func (m *shard[K, V]) getHas(key K) (val V, ok bool) {
 	m.RLock()
 
-	v,ok := m.Map.GetHas(key);
+	ok,v := m.Map.GetHas(key);
 	val = v.Object
 
 	m.RUnlock()
@@ -77,7 +77,7 @@ func (m *shard[K, V]) getHas(key K) (val V, ok bool) {
 func (m *shard[K, V]) getHasRenew(key K) (val V, ok bool) {
 	m.Lock()
 
-	if v,ok := m.Map.GetHas(key); ok {
+	if ok,v := m.Map.GetHas(key); ok {
 		v.Expire = time.Now().Add(m.Expiration)
 		m.Map.Set(key, v)
 		val = v.Object
@@ -118,7 +118,7 @@ func (m *shard[K, V]) delete(key K) (ok bool) {
 func (m *shard[K, V]) isExpired(key K) (ex bool) {
 	m.RLock()
 
-	if v, ok := m.Map.GetHas(key); ok {
+	if ok,v:= m.Map.GetHas(key); ok {
 		ex = time.Now().After(v.Expire)
 	}
 
@@ -131,7 +131,7 @@ func (m *shard[K, V]) evictItem(key K, cb func(K,V)) (ex bool) {
 	m.Lock()
 
 	ex = false
-	if v, ok := m.Map.GetHas(key); ok {
+	if ok,v := m.Map.GetHas(key); ok {
 		if time.Now().After(v.Expire) {
 			ex = true
 			cb(key, v.Object)
@@ -169,7 +169,7 @@ func (m *shard[K, V]) renew(key K) {
 
 	m.Lock()
 	
-	if v, ok := m.Map.GetHas(key); ok {
+	if ok,v := m.Map.GetHas(key); ok {
 		v.Expire = expire
 	}
 

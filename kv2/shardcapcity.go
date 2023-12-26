@@ -39,7 +39,7 @@ func (m *shardCapacity[K, V]) has(key K) bool {
 func (m *shardCapacity[K, V]) getHasRenew(key K) (V, bool) {
 	m.Lock()
 
-	val, ok := m.Map.GetHas(key)
+	ok,val := m.Map.GetHas(key)
 	val.Index = m.Stack.MoveToBack(val.Index)
 	m.Map.Set(key, val)
 
@@ -51,7 +51,7 @@ func (m *shardCapacity[K, V]) getHasRenew(key K) (V, bool) {
 func (m *shardCapacity[K, V]) getHas(key K) (V, bool) {
 	m.RLock()
 
-	val, ok := m.Map.GetHas(key)
+	ok,val := m.Map.GetHas(key)
 
 	m.RUnlock()
 
@@ -111,7 +111,7 @@ func (m *shardCapacity[K, V]) set(key K, val V, callback func(K, V)) {
 func (m *shardCapacity[K, V]) update(key K, val V) {
 	m.Lock()
 
-	if v, ok := m.Map.GetHas(key); ok {
+	if ok,v := m.Map.GetHas(key); ok {
 		v.Object = val
 		v.Index = m.Stack.MoveToBack(v.Index)
 		m.Map.Set(key, v)
