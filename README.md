@@ -1,5 +1,9 @@
 # kv
+[![GoDoc](https://godoc.org/github.com/saintwish/kv?status.svg)](https://pkg.go.dev/github.com/saintwish/kv)
+
 A collection of a few Go packages for Key Value storage like caches.
+
+``go get github.com/saintwish/kv``
 
 ## Packages
 All of the packages of generic support for safety. Some of the packages use the [swiss map](https://github.com/dolthub/swiss) instead of the default Go map.
