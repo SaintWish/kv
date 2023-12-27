@@ -188,7 +188,7 @@ func (m *Map[K, V]) Set(key K, value V) {
 	}
 }
 
-// Delete attempts to remove |key|, returns true successful and the item.
+// Delete attempts to remove |key|, returns true if successful and the item.
 func (m *Map[K, V]) Delete(key K) (ok bool, value V) {
 	hi, lo := splitHash(m.hash.Hash(key))
 	g := probeStart(hi, len(m.groups))
@@ -197,7 +197,7 @@ func (m *Map[K, V]) Delete(key K) (ok bool, value V) {
 		for matches != 0 {
 			s := nextMatch(&matches)
 			if key == m.groups[g].keys[s] {
-				ok, val = true, m.groups[g].values[s]
+				ok, value = true, m.groups[g].values[s]
 				// optimization: if |m.ctrl[g]| contains any empty
 				// metadata bytes, we can physically delete |key|
 				// rather than placing a tombstone.
@@ -224,7 +224,7 @@ func (m *Map[K, V]) Delete(key K) (ok bool, value V) {
 		matches = metaMatchEmpty(&m.ctrl[g])
 		if matches != 0 { // |key| absent
 			var v V
-			ok,val = false, v
+			ok, value = false, v
 			return
 		}
 		g += 1 // linear probing
