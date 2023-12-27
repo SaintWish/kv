@@ -61,11 +61,13 @@ func (c *Cache[K, V]) Has(key K) bool {
 	return shard.has(key)
 }
 
+// Sets the key with value, will overwrite if key exists
 func (c *Cache[K, V]) Set(key K, val V) {
 	shard := c.getShard(key)
 	shard.set(key, val, c.OnEvicted)
 }
 
+// Adds key with value to map, will error if key already exists.
 func (c *Cache[K, V]) Add(key K, val V) error {
 	shard := c.getShard(key)
 	if shard.has(key) {
@@ -76,6 +78,7 @@ func (c *Cache[K, V]) Add(key K, val V) error {
 	return nil
 }
 
+// Updates given key, errors if key doesn't already exists.
 func (c *Cache[K, V]) Update(key K, val V) error {
 	shard := c.getShard(key)
 	if !shard.has(key) {
@@ -86,6 +89,7 @@ func (c *Cache[K, V]) Update(key K, val V) error {
 	return nil
 }
 
+// Will Set or Update said key depending if exists or not.
 func (c *Cache[K, V]) SetOrUpdate(key K, val V) {
 	shard := c.getShard(key)
 	if shard.has(key) {
@@ -95,11 +99,13 @@ func (c *Cache[K, V]) SetOrUpdate(key K, val V) {
 	}
 }
 
+// Deletes key and returns boolean if sucessful.
 func (c *Cache[K, V]) Delete(key K) bool {
 	shard := c.getShard(key)
 	return shard.delete(key)
 }
 
+// Deletes key and returns boolean if sucessful OnEviction callback.
 func (c *Cache[K, V]) DeleteCallback(key K) bool {
 	shard := c.getShard(key)
 	return shard.deleteCallback(key, c.OnEvicted)
@@ -124,6 +130,16 @@ func (c *Cache[K, V]) GetShardCapacity(key K) int {
 	return shard.Map.Capacity()
 }
 
+// Gets the current amount of elements in the cache.
+func (c *Cache[K, V]) Count() (count int) {
+	for i := 0; i < len(c.shards); i++ {
+		shard := c.shards[i]
+		count = count + shard.Map.Count()
+	}
+	return
+}
+
+// Clears the cache with OnEviction callback.
 func (c *Cache[K, V]) Flush() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]
