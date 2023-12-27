@@ -105,6 +105,21 @@ func (m *shard[K, V]) set(key K, val V) {
 	m.Unlock()
 }
 
+func (m *shard[K, V]) update(key K, val V) {
+	itm := item[V]{
+		Object: val,
+		Expire: time.Now().Add(m.Expiration),
+	}
+
+	m.Lock()
+
+	if ok := m.Map.Has(key); ok {
+		m.Map.Set(key, itm)
+	}
+
+	m.Unlock()
+}
+
 func (m *shard[K, V]) delete(key K) (ok bool) {
 	m.Lock()
 
@@ -127,14 +142,14 @@ func (m *shard[K, V]) isExpired(key K) (ex bool) {
 }
 
 //Returns true if item is expired and thus evicted.
-func (m *shard[K, V]) evictItem(key K, cb func(K,V)) (ex bool) {
+func (m *shard[K, V]) evictItem(key K, callback func(K,V)) (ex bool) {
 	m.Lock()
 
 	ex = false
 	if ok,v := m.Map.GetHas(key); ok {
 		if time.Now().After(v.Expire) {
 			ex = true
-			cb(key, v.Object)
+			callback(key, v.Object)
 			m.Map.Delete(key)
 		}
 	}
@@ -144,12 +159,12 @@ func (m *shard[K, V]) evictItem(key K, cb func(K,V)) (ex bool) {
 	return
 }
 
-func (m *shard[K, V]) evictExpired(cb func(K,V)) {
+func (m *shard[K, V]) evictExpired(callback func(K,V)) {
 	m.Lock()
 
 	m.Map.Iter(func (key K, v item[V]) (stop bool) {
 		if time.Now().After(v.Expire) {
-			cb(key, v.Object)
+			callback(key, v.Object)
 			m.Map.Delete(key)
 		}
 		
@@ -172,6 +187,27 @@ func (m *shard[K, V]) renew(key K) {
 	if ok,v := m.Map.GetHas(key); ok {
 		v.Expire = expire
 	}
+
+	m.Unlock()
+}
+
+func (m *shard[K, V]) clear() {
+	m.Map.Clear()
+}
+
+func (m *shard[K, V]) flush(callback func(K, V)) {
+	m.Lock()
+
+	m.Map.Iter(func(key K, val item[V]) (stop bool) {
+		callback(key, val.Object)
+		m.Map.Delete(key)
+		
+		if stop {
+			return
+		}
+
+		return
+	})
 
 	m.Unlock()
 }

@@ -11,7 +11,7 @@ type Cache[K comparable, V any] struct {
 	shardCount uint64
 	hash maphash.Hasher[K]
 
-	OnEvicted func(K, V) //function that's called when cached item is deleted by the system
+	OnDeleted func(K, V) //function that's called when cached item is deleted by the system
 }
 
 func New[K comparable, V any](sz uint64, sc uint64) *Cache[K, V] {
@@ -42,8 +42,8 @@ func (c *Cache[K, V]) getShard(key K) *shard[K, V] {
 	return c.shards[sum%c.shardCount]
 }
 
-func (c *Cache[K, V]) SetOnEvicted(f func(K, V)) {
-	c.OnEvicted = f
+func (c *Cache[K, V]) SetOnDeleted(f func(K, V)) {
+	c.OnDeleted = f
 }
 
 func (c *Cache[K, V]) Get(key K) V {
@@ -64,7 +64,7 @@ func (c *Cache[K, V]) Has(key K) bool {
 // Sets the key with value, will overwrite if key exists
 func (c *Cache[K, V]) Set(key K, val V) {
 	shard := c.getShard(key)
-	shard.set(key, val, c.OnEvicted)
+	shard.set(key, val)
 }
 
 // Adds key with value to map, will error if key already exists.
@@ -74,7 +74,7 @@ func (c *Cache[K, V]) Add(key K, val V) error {
 		return fmt.Errorf("kv1s: Data already exists with given key %T", key)
 	}
 
-	shard.set(key, val, c.OnEvicted)
+	shard.set(key, val)
 	return nil
 }
 
@@ -95,7 +95,7 @@ func (c *Cache[K, V]) SetOrUpdate(key K, val V) {
 	if shard.has(key) {
 		shard.update(key, val)
 	}else{
-		shard.set(key, val, c.OnEvicted)
+		shard.set(key, val)
 	}
 }
 
@@ -105,10 +105,10 @@ func (c *Cache[K, V]) Delete(key K) bool {
 	return shard.delete(key)
 }
 
-// Deletes key and returns boolean if sucessful OnEviction callback.
+// Deletes key and returns boolean if sucessful OnDeleted callback.
 func (c *Cache[K, V]) DeleteCallback(key K) bool {
 	shard := c.getShard(key)
-	return shard.deleteCallback(key, c.OnEvicted)
+	return shard.deleteCallback(key, c.OnDeleted)
 }
 
 func (c *Cache[K, V]) ShardCount() uint64 {
@@ -143,7 +143,7 @@ func (c *Cache[K, V]) Count() (count int) {
 func (c *Cache[K, V]) Flush() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]
-		shard.flush(c.OnEvicted)
+		shard.flush(c.OnDeleted)
 	}
 }
 

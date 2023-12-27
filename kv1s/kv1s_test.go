@@ -25,7 +25,7 @@ func TestSetGet_KeyInt(t *testing.T) {
 
 func TestFlush(t *testing.T) {
 	cache := New[int, string](2048, 32)
-	cache.SetOnEvicted(func(k int, v string){
+	cache.SetOnDeleted(func(k int, v string){
 		fmt.Println(k)
 	})
 

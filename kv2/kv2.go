@@ -134,6 +134,7 @@ func (c *Cache[K, V]) GetShardCapacity(key K) int {
 	return shard.Map.Capacity()
 }
 
+// Clears the cache with calling OnEviction callback
 func (c *Cache[K, V]) Flush() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]
@@ -141,6 +142,7 @@ func (c *Cache[K, V]) Flush() {
 	}
 }
 
+// Clears the cache without calling OnEviction callback
 func (c *Cache[K, V]) Clear() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]

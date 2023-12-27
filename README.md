@@ -10,7 +10,7 @@ All of the packages of generic support for safety. Some of the packages use the 
 
 * `kv1` - A Key Value sharded cache with time expiration. Uses ``swiss`` map.
 * `kv1s` - A Key Value sharded cache without any auto eviction. Uses ``swiss`` map.
-* `kv2` - A Key Value sharded cache with a max size and automated eviction. Uses ``swiss`` map.
+* `kv2` - A Key Value sharded cache with a max size and automated eviction. Uses ``swiss`` map. Shouldn't be used!
 * `kvmap` - A Key Value sharded cache using vanilla Go map with no auto eviction.
 * `ccmap` - A concurrent safe default Go map without sharding.
 * `stack` - A last in, first out stack implementation without concurrency support. Used in the ``kv2`` package.

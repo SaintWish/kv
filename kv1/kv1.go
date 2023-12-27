@@ -47,11 +47,6 @@ func (c *Cache[K, V]) SetOnEvicted(f func(K, V)) {
 	c.OnEvicted = f
 }
 
-func (c *Cache[K, V]) Set(key K, val V) {
-	shard := c.getShard(key)
-	shard.set(key, val)
-}
-
 func (c *Cache[K, V]) Get(key K) V {
 	shard := c.getShard(key)
 	return shard.get(key)
@@ -77,6 +72,13 @@ func (c *Cache[K, V]) Has(key K) bool {
 	return shard.has(key)
 }
 
+// Sets the key with value, will overwrite if key exists
+func (c *Cache[K, V]) Set(key K, val V) {
+	shard := c.getShard(key)
+	shard.set(key, val)
+}
+
+// Adds key with value to map, will error if key already exists.
 func (c *Cache[K, V]) Add(key K, val V) error {
 	shard := c.getShard(key)
 	if shard.has(key) {
@@ -87,14 +89,25 @@ func (c *Cache[K, V]) Add(key K, val V) error {
 	return nil
 }
 
+// Updates given key, errors if key doesn't already exists.
 func (c *Cache[K, V]) Update(key K, val V) error {
 	shard := c.getShard(key)
 	if !shard.has(key) {
 		return fmt.Errorf("kv1: Data doesn't exists with given key %T", key)
 	}
 
-	shard.set(key, val)
+	shard.update(key, val)
 	return nil
+}
+
+// Will Set or Update said key depending if exists or not.
+func (c *Cache[K, V]) SetOrUpdate(key K, val V) {
+	shard := c.getShard(key)
+	if shard.has(key) {
+		shard.update(key, val)
+	}else{
+		shard.set(key, val)
+	}
 }
 
 func (c *Cache[K, V]) Renew(key K) {
@@ -126,22 +139,28 @@ func (c *Cache[K, V]) GetShardCapacity(key K) int {
 	return shard.Map.Capacity()
 }
 
+// Gets the current amount of elements in the cache.
+func (c *Cache[K, V]) Count() (count int) {
+	for i := 0; i < len(c.shards); i++ {
+		shard := c.shards[i]
+		count = count + shard.Map.Count()
+	}
+	return
+}
+
+// Clears the cache with calling OnEviction callback
 func (c *Cache[K, V]) Flush() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]
-		shard.Lock()
-		defer shard.Unlock()
+		shard.flush(c.OnEvicted)
+	}
+}
 
-		shard.Map.Iter(func(key K, val item[V]) (stop bool) {
-			c.OnEvicted(key, val.Object)
-			shard.Map.Delete(key)
-			
-			if stop {
-				return
-			}
-
-			return
-		})
+// Clears the cache without calling OnEviction callback
+func (c *Cache[K, V]) Clear() {
+	for i := 0; i < len(c.shards); i++ {
+		shard := c.shards[i]
+		shard.clear()
 	}
 }
 
